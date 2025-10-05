@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  BUSINESS
+  WORKER
+  BOTH
+}
+
+enum CampaignStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id          String   @id @default(cuid())
+  walletAddress String @unique
+  role        UserRole @default(BOTH)
+  username    String?
+  email       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Business owner relations
+  createdCampaigns Campaign[] @relation("BusinessOwner")
+  
+  // Worker relations
+  submissions ReviewSubmission[]
+  
+  @@map("users")
+}
+
+model Campaign {
+  id              String         @id @default(cuid())
+  chainCampaignId Int           @unique // ID from smart contract
+  businessOwnerId String
+  reviewLink      String
+  totalPool       String        // Wei amount as string
+  rewardAmount    String        // Wei amount as string
+  claimedReviews  Int           @default(0)
+  maxReviews      Int
+  status          CampaignStatus @default(ACTIVE)
+  txHash          String?       // Transaction hash
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // Relations
+  businessOwner   User          @relation("BusinessOwner", fields: [businessOwnerId], references: [id])
+  submissions     ReviewSubmission[]
+  
+  @@map("campaigns")
+}
+
+model ReviewSubmission {
+  id          String   @id @default(cuid())
+  campaignId  String
+  workerId    String
+  proofLink   String
+  txHash      String?  // Transaction hash for payment
+  rewardAmount String  // Wei amount as string
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  worker      User     @relation(fields: [workerId], references: [id])
+  
+  @@unique([campaignId, workerId]) // One submission per worker per campaign
+  @@map("review_submissions")
+}

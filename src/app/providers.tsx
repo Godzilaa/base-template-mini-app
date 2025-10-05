@@ -1,19 +1,11 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { MiniAppProvider } from "@neynar/react";
-
-const WagmiProvider = dynamic(
-  () => import("~/components/providers/WagmiProvider"),
-  {
-    ssr: false,
-  }
-);
+import React from "react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <WagmiProvider>
-      <MiniAppProvider analyticsEnabled={true}>{children}</MiniAppProvider>
-    </WagmiProvider>
+    <div className="min-h-screen bg-gray-50">
+      {children}
+    </div>
   );
 }
