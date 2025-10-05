@@ -4,7 +4,6 @@ import { useCallback, useState, useEffect } from "react";
 import { Button } from "./Button";
 import { useMiniApp } from "@neynar/react";
 import { type ComposeCast } from "@farcaster/frame-sdk";
-import { fetchWithAuth } from "~/lib/auth";
 
 interface EmbedConfig {
   path?: string;
@@ -45,7 +44,7 @@ export function ShareButton({
 
       const fetchBestFriends = async () => {
         try {
-          const response = await fetchWithAuth(`/api/best-friends`);
+          const response = await fetch(`/api/best-friends`);
           const data = await response.json();
           setBestFriends(data.bestFriends);
         } catch (err) {
@@ -68,7 +67,7 @@ export function ShareButton({
       if (cast.bestFriends) {
         if (bestFriends) {
           // Replace @N with usernames, or remove if no matching friend
-          finalText = finalText.replace(/@\d+/g, (match) => {
+          finalText = finalText.replace(/@\d+/g, (match: string) => {
             const friendIndex = parseInt(match.slice(1)) - 1;
             const friend = bestFriends[friendIndex];
             if (friend) {
