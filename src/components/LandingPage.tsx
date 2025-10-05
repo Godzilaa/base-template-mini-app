@@ -325,6 +325,7 @@ export default function LandingPage() {
               <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">Terms</a>
               <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">Support</a>
               <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">Docs</a>
+              <a href="/test" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">🔧 Contract Test</a>
             </div>
             <div className="text-sm text-gray-500">
               © 2025 BaseReviews. Built on Base Network.

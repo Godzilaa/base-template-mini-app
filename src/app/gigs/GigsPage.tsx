@@ -10,7 +10,7 @@ import { ethers } from 'ethers';
 
 export default function GigsPage() {
   const router = useRouter();
-  const { isConnected, address, balance, connectWallet } = useWalletConnect();
+  const { isConnected, address, balance, connectWallet, refreshBalance, refreshingBalance, connecting, error } = useWalletConnect();
   const { campaigns: allCampaigns } = useCampaigns();
   const { userCampaigns } = useUserCampaigns(address || undefined);
   const { submitReview } = useSubmitReview();
@@ -154,11 +154,11 @@ export default function GigsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-emerald-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-emerald-50 overflow-x-hidden">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md shadow-sm border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 gap-3 sm:gap-0">
             <div className="flex items-center">
               <button
                 onClick={() => router.push('/')}
@@ -179,18 +179,36 @@ export default function GigsPage() {
             
             <div className="flex items-center space-x-4">
               {!isConnected ? (
-                <Button
-                  onClick={connectWallet}
-                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 py-2 rounded-lg transition-all duration-200"
-                >
-                  Connect Wallet
-                </Button>
+                <div className="flex flex-col items-end">
+                  <Button
+                    onClick={connectWallet}
+                    disabled={connecting}
+                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-50"
+                  >
+                    {connecting ? 'Connecting...' : 'Connect Wallet'}
+                  </Button>
+                  {error && (
+                    <div className="text-xs text-red-500 mt-1 max-w-48 text-right">
+                      {error}
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="flex items-center space-x-3">
                   <div className="text-sm text-gray-600 flex flex-col items-end">
                     <div>{address?.slice(0, 6)}...{address?.slice(-4)}</div>
-                    <div className="text-xs text-gray-500">
-                      {balance === 'N/A' ? 'Balance unavailable' : `${parseFloat(balance || '0').toFixed(4)} ETH`}
+                    <div className="text-xs text-gray-500 flex items-center gap-1">
+                      {balance === 'N/A' ? (
+                        <button 
+                          onClick={refreshBalance}
+                          disabled={refreshingBalance}
+                          className="text-emerald-600 hover:text-emerald-700 underline disabled:opacity-50"
+                        >
+                          {refreshingBalance ? 'Loading...' : 'Load Balance'}
+                        </button>
+                      ) : (
+                        `${parseFloat(balance || '0').toFixed(4)} ETH`
+                      )}
                     </div>
                   </div>
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -211,15 +229,15 @@ export default function GigsPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Find Review Gigs</h2>
-          <p className="text-gray-600">Discover businesses looking for authentic reviews and earn crypto rewards.</p>
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Find Review Gigs</h2>
+          <p className="text-sm sm:text-base text-gray-600">Discover businesses looking for authentic reviews and earn crypto rewards.</p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           {stats.map((stat, index) => (
             <div key={index} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
               <div className="flex items-center">
